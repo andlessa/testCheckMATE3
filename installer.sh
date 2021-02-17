@@ -47,7 +47,7 @@ read answer
 if echo "$answer" | grep -iq "^y" ;then
 	if hash gzip 2>/dev/null; then
 		mkdir pythia8;
-#		echo "[installer] getting Pythia"; wget $URL 2>/dev/null || curl -O $URL; 
+		echo "[installer] getting Pythia"; wget $URL 2>/dev/null || curl -O $URL; 
         tar -zxf $pythia -C pythia8 --strip-components 1;
 		echo "Installing Pythia in pythia8";
 		cd pythia8;

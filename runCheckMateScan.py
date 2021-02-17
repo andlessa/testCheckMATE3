@@ -108,7 +108,7 @@ def RunCheckMate(parserDict):
     #Remove parton level events:
     if pars['cleanUp'] is True:
         mg5folder = os.path.join(resultFolder,'mg5amcatnlo')
-        if os.path.isfolder(mg5folder):
+        if os.path.isdir(mg5folder):
             logger.debug('Removing data from: %s \n' %mg5folder)
             for f in os.listdir(mg5folder):
                 file_path = os.path.join(mg5folder, f)

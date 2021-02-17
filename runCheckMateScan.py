@@ -11,7 +11,7 @@
 #First tell the system where to find the modules:
 import sys,os,glob,shutil
 from configParserWrapper import ConfigParserExt
-import logging
+import logging,shutil
 import subprocess
 import time,datetime
 import multiprocessing
@@ -70,6 +70,7 @@ def RunCheckMate(parserDict):
     parser.read_dict(parserDict)
 
     pars = parser.toDict(raw=False)["options"]
+
     outputFolder = os.path.abspath(parser.get("CheckMateParameters","OutputDirectory"))
     resultFolder = os.path.join(outputFolder,parser.get("CheckMateParameters","Name"))
     if os.path.isdir(resultFolder):
@@ -100,9 +101,20 @@ def RunCheckMate(parserDict):
     logger.debug('CheckMATE error:\n %s \n' %errorMsg)
     logger.debug('CheckMATE output:\n %s \n' %output)
 
-    # os.remove(cardFile)
+    os.remove(cardFile)
 
     logger.info("Done in %3.2f min" %((time.time()-t0)/60.))
+
+    #Remove parton level events:
+    if pars['cleanUp'] is True:
+        mg5folder = os.path.join(resultFolder,'mg5amcatnlo')
+        if os.path.isfolder(mg5folder):
+            logger.debug('Removing data from: %s \n' %mg5folder)
+            for f in os.listdir(mg5folder):
+                file_path = os.path.join(mg5folder, f)
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+
     now = datetime.datetime.now()
 
     return "Finished running CheckMATE at %s" %(now.strftime("%Y-%m-%d %H:%M"))

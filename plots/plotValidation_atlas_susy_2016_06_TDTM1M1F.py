@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
+from getContour import getContour
+from scipy.interpolate import griddata
 
 pd.options.mode.chained_assignment = None #Disable copy warnings
 #Define plotting style:
@@ -23,8 +25,8 @@ excATLAS = np.genfromtxt('./HEPData-ins1641262-v4-Exclusion_contour_EW_2_obs_con
                        names=True)
 
 # %% Get data from CheckMate results
-resultFolder = './data/TDTM1M2F_cm'
-slhaFolder = './data/TDTM1M2F_slha'
+resultFolder = '../data/TDTM1M2F_cm'
+slhaFolder = '../data/TDTM1M2F_slha'
 rData = []
 for slhaFile in glob.glob(slhaFolder+'/*.slha'):
     slhaData = pyslha.readSLHAFile(slhaFile)
@@ -41,79 +43,82 @@ for slhaFile in glob.glob(slhaFolder+'/*.slha'):
     ctau_ns = 6.582e-16/widthC1
     ns = data['s'][0]
     ds = data['ds'][0]
+    eff = data['eff'][0]
+    if eff:
+        sigUL = 0.22/eff
+    else:
+        sigUL = -1.0
     if ns > 0:
         ds_rel = ds/ns
     else:
         ds_rel = ds/1.0
-    rData.append([mC1,ctau_ns,data['robs'][0],ds_rel])
+    rData.append([mC1,ctau_ns,data['robs'][0],data['robscons'][0],ds_rel,sigUL])
 
 rData = np.array(rData)
 
 # %%
 print(excATLAS.dtype)
 
-# %% plot results
-fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(18,8))
-ax = axes[0].scatter(rData[:,0],rData[:,1],
-    c=rData[:,2],cmap=cm,vmin=0.0,vmax=2.0,s=120)
-
-axes[0].plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='b')
-
-axes[0].set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
-axes[0].set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
-axes[0].set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm + \tilde{\chi}_1^0$')
-axes[0].set_yscale('log')
-
-ax = axes[1].scatter(rData[:,0],rData[:,1],
-    c=rData[:,-1],cmap=cm,vmin=0.0,vmax=2.0,s=120)
-axes[1].set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
-axes[1].set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
-
-cb = fig.colorbar(ax, ax=axes.ravel().tolist())
-cb.set_label(r'$r$')
-plt.savefig("atlas_susy_2016_06_CM.png")
-
-
 
 
 ## %% Get exclusion contours for signal
-contoursHigh = getContour(rData[:,0],rData[:,1],rData[:,2],levels=[1.0])
-contoursLow = getContour(rData[:,0],rData[:,1],rData[:,3],levels=[1.0])
+contours = getContour(rData[:,0],rData[:,1],rData[:,2],levels=[0.83,0.9,1.0],ylog=True)
 
-# %% Load data
-offCurveComb = np.genfromtxt('./ATLAS_data/HEPData-ins1765529-v1-Exclusion_contour_1_Obs.csv',
-                        delimiter=',', names=True, skip_header=10)
-offCurveLow = np.genfromtxt('./ATLAS_data/HEPData-ins1765529-v1-Exclusion_contour_aux_1_Obs.csv',
-                        delimiter=',', names=True, skip_header=10)
-offCurveHigh = np.genfromtxt('./ATLAS_data/HEPData-ins1765529-v1-Exclusion_contour_aux_2_Obs.csv',
-                        delimiter=',', names=True, skip_header=10)
 
-# %% Plot exclusion curve
-fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(18,8))
-ax = axes[0].scatter(rData[:,0],rData[:,1],
-    c=rData[:,2],cmap=cm,vmin=0.0,vmax=2.0,s=70)
-for level,curves in contoursHigh.items():
-    for curve in curves:
-        axes[0].plot(curve[:,0],curve[:,1],label='Recast (r = %s)' %str(level),linestyle='--',linewidth=4)
-axes[0].plot(offCurveHigh['MSTAU_GeV'],offCurveHigh['MNEUTRALINO1_GeV'],linewidth=4,
-        color='black',label='ATLAS-SUSY-2018-04 (High Mass)')
+# %% plot results
+fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10,6))
+ax = axes.scatter(rData[:,0],rData[:,1],
+    c=rData[:,2],cmap=cm,vmin=0.0,vmax=2.0,s=120)
 
-ax = axes[1].scatter(rData[:,0],rData[:,1],
-    c=rData[:,3],cmap=cm,vmin=0.0,vmax=2.0,s=70)
-for level,curves in contoursLow.items():
-    for curve in curves:
-        axes[1].plot(curve[:,0],curve[:,1],label='Recast (r = %s)' %str(level),linestyle='--',linewidth=4)
-axes[1].plot(offCurveLow['MSTAU_GeV'],offCurveLow['MNEUTRALINO1_GeV'],linewidth=4,
-        color='black',label='ATLAS-SUSY-2018-04 (Low Mass)')
-axes[0].legend()
-axes[0].set_xlabel(r'$m_{\tilde{\tau}}$ (GeV)')
-axes[0].set_ylabel(r'$m_{\tilde{\chi}_1^0}$ (GeV)')
-axes[0].set_title(r'$\tilde{\tau} \tilde{\tau}, \tilde{\tau} \to \tau + \tilde{\chi}_1^0$ (SR-HighMass)')
-axes[1].legend()
-axes[1].set_xlabel(r'$m_{\tilde{\tau}}$ (GeV)')
-axes[1].set_title(r'$\tilde{\tau} \tilde{\tau}, \tilde{\tau} \to \tau + \tilde{\chi}_1^0$ (SR-lowMass)')
+axes.plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='black',linewidth=3,label='ATLAS')
 
-cb = fig.colorbar(ax, ax=axes.ravel().tolist())
-cb.set_label(r'$r = \sigma/\sigma_{UL}^{95}$')
-plt.savefig("atlas_susy_2018_04_Stau.png")
-plt.show()
+axes.plot(contours[1.0][0][:,0],contours[1.0][0][:,1],linestyle='--',c='gray',linewidth=3,label='CheckMATE (LO)')
+axes.plot(contours[0.9][0][:,0],contours[0.9][0][:,1],linestyle='-.',c='gray',linewidth=3,label='CheckMATE (k = 1.1)')
+axes.plot(contours[0.83][0][:,0],contours[0.83][0][:,1],linestyle='-',c='gray',linewidth=3,label='CheckMATE (k = 1.2)')
+
+axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
+axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
+axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm + \tilde{\chi}_1^0$')
+axes.set_yscale('log')
+
+# ax = axes[1].scatter(rData[:,0],rData[:,1],
+    # c=rData[:,-1],cmap=cm,vmin=0.0,vmax=2.0,s=120)
+# axes[1].set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
+# axes[1].set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
+
+cb = fig.colorbar(ax,label=r'$r=\sigma/\sigma_UL$')
+cb.set_label(r'$r$')
+plt.legend(loc='lower right',framealpha=0.9)
+plt.savefig("atlas_susy_2016_06_ExcComp.png")
+
+
+
+# %%
+ULmap = np.genfromtxt('./UpperLimitEW.csv',names=True,skip_header=10,delimiter=',')
+ULmapATLAS = 1e3*ULmap['The_95__CL_s_upper_limits_on_the_production_crosssection_fb']
+
+# %% Create grid for interpolating upper limits from recasting:
+newpts = np.array(list(zip(ULmap['MCHARGINO1_GEV'],np.log10(ULmap['TAUCHARGINO1_NS']))))
+ULmapRecast = griddata(list(zip(rData[:,0],np.log10(rData[:,1]))),rData[:,4],newpts)
+
+## %% Get upper limit relative diff:
+ULdiff = (ULmapRecast-ULmapATLAS)/ULmapATLAS
+
+
+# %% plot results
+fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10,6))
+ax = axes.scatter(ULmap['MCHARGINO1_GEV'],ULmap['TAUCHARGINO1_NS'],
+    c=ULdiff,cmap=cm,vmin=-0.5,vmax=0.5,s=120)
+
+for i,pt in enumerate(ULdiff):
+    axes.annotate('%1.1f'%pt,(ULmap['MCHARGINO1_GEV'][i],1.05*ULmap['TAUCHARGINO1_NS'][i]),
+                    fontsize=15)
+
+
+axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
+axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
+axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm + \tilde{\chi}_1^0$')
+axes.set_yscale('log')
+cb = fig.colorbar(ax,label=r'$r=\sigma/\sigma_UL$')
+cb.set_label(r'$(\sigma_UL^{CM}-\sigma_UL^{ATLAS})/\sigma_UL^{ATLAS}$')
+plt.savefig("atlas_susy_2016_06_ULcomp.png")

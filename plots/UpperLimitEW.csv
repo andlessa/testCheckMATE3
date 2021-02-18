@@ -1,0 +1,36 @@
+#: table_doi: 10.17182/hepdata.78375.v4/t33
+#: name: Upper Limit EW
+#: description: Model dependent upper limits on cross-section (pb) for the electroweak production are shown by grey numbers in terms of the chargino lifetime ($\tau_{\tilde{\chi}_{1}^{\pm}}$) and mass ($m_{\tilde{\chi}_{1}^{\pm}}$).
+#: data_file: Fig10Limit.yaml
+#: keyword reactions: P P --> GAUGINO GAUGINO X
+#: keyword observables: Upper limits
+#: keyword phrases: Proton-Proton Scattering | Supersymmetry | SUSY | Disappearing Track
+#: keyword cmenergies: 13000.0
+#: RE,P P --> WINO WINO X
+#: SQRT(S) [GEV],13000.0
+M(CHARGINO1) [GEV.],TAU(CHARGINO1) [NS.],The 95 \% $CL_{s}$ upper limits on the production cross-section [fb]
+95.0,0.05,1.88
+95.0,0.2,0.25
+95.0,1.0,0.29
+95.0,4.0,0.96
+200.0,0.05,2.57
+200.0,0.2,0.12
+200.0,1.0,0.08
+200.0,4.0,0.24
+300.0,0.05,2.95
+300.0,0.2,0.12
+300.0,1.0,0.06
+300.0,4.0,0.15
+400.0,0.05,4.94
+400.0,0.2,0.11
+400.0,1.0,0.05
+400.0,4.0,0.11
+500.0,0.05,4.76
+500.0,0.2,0.1
+500.0,1.0,0.04
+500.0,4.0,0.08
+600.0,0.05,7.64
+600.0,0.2,0.11
+600.0,1.0,0.03
+600.0,4.0,0.07
+

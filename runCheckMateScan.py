@@ -114,6 +114,9 @@ def RunCheckMate(parserDict):
                 file_path = os.path.join(mg5folder, f)
                 if os.path.isdir(file_path):
                     shutil.rmtree(file_path)
+        analysisfolder = os.path.join(resultFolder,'analysis')
+        if os.path.isfile(os.path.join(analysisfolder,'analysisstdout_atlas_1712_02118_ew.log')):
+            os.remove(os.path.join(analysisfolder,'analysisstdout_atlas_1712_02118_ew.log'))
 
     now = datetime.datetime.now()
 

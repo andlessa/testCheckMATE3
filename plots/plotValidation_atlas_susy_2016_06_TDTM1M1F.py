@@ -78,7 +78,7 @@ axes.plot(contours[0.83][0][:,0],contours[0.83][0][:,1],linestyle='-',c='gray',l
 
 axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
 axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
-axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm + \tilde{\chi}_1^0$')
+axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm \tilde{\chi}_1^0$')
 axes.set_yscale('log')
 
 # ax = axes[1].scatter(rData[:,0],rData[:,1],
@@ -95,21 +95,22 @@ plt.savefig("atlas_susy_2016_06_ExcComp.png")
 
 # %%
 ULmap = np.genfromtxt('./UpperLimitEW.csv',names=True,skip_header=10,delimiter=',')
-ULmapATLAS = 1e3*ULmap['The_95__CL_s_upper_limits_on_the_production_crosssection_fb']
+#The UL map is actually in pb!
+ULATLAS = 1e3*ULmap['The_95__CL_s_upper_limits_on_the_production_crosssection_fb']
+
 
 # %% Create grid for interpolating upper limits from recasting:
 newpts = np.array(list(zip(ULmap['MCHARGINO1_GEV'],np.log10(ULmap['TAUCHARGINO1_NS']))))
-ULmapRecast = griddata(list(zip(rData[:,0],np.log10(rData[:,1]))),rData[:,4],newpts)
+ULmapRecast = griddata(list(zip(rData[:,0],np.log10(rData[:,1]))),rData[:,5],newpts)
 
 ## %% Get upper limit relative diff:
-ULdiff = (ULmapRecast-ULmapATLAS)/ULmapATLAS
-
+ULdiff = (ULmapRecast-ULATLAS)/ULATLAS
 
 # %% plot results
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10,6))
 ax = axes.scatter(ULmap['MCHARGINO1_GEV'],ULmap['TAUCHARGINO1_NS'],
     c=ULdiff,cmap=cm,vmin=-0.5,vmax=0.5,s=120)
-
+axes.plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='black',linewidth=3,label='ATLAS',alpha=0.5)
 for i,pt in enumerate(ULdiff):
     axes.annotate('%1.1f'%pt,(ULmap['MCHARGINO1_GEV'][i],1.05*ULmap['TAUCHARGINO1_NS'][i]),
                     fontsize=15)
@@ -117,8 +118,9 @@ for i,pt in enumerate(ULdiff):
 
 axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
 axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
-axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm + \tilde{\chi}_1^0$')
+axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm \tilde{\chi}_1^0$')
 axes.set_yscale('log')
+axes.set_xlim(120,650)
 cb = fig.colorbar(ax,label=r'$r=\sigma/\sigma_UL$')
 cb.set_label(r'$(\sigma_UL^{CM}-\sigma_UL^{ATLAS})/\sigma_UL^{ATLAS}$')
 plt.savefig("atlas_susy_2016_06_ULcomp.png")

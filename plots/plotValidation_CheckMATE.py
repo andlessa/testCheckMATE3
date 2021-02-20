@@ -72,9 +72,8 @@ ax = axes.scatter(rData[:,0],rData[:,1],
 
 axes.plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='black',linewidth=3,label='ATLAS')
 
-axes.plot(contours[1.0][0][:,0],contours[1.0][0][:,1],linestyle='--',c='gray',linewidth=3,label='CheckMATE (LO)')
-axes.plot(contours[0.9][0][:,0],contours[0.9][0][:,1],linestyle='-.',c='gray',linewidth=3,label='CheckMATE (k = 1.1)')
-axes.plot(contours[0.83][0][:,0],contours[0.83][0][:,1],linestyle='-',c='gray',linewidth=3,label='CheckMATE (k = 1.2)')
+axes.plot(contours[1.0][0][:,0],contours[1.0][0][:,1],linestyle='--',c='green',linewidth=3,label='CheckMATE (LO)')
+axes.plot(contours[0.9][0][:,0],contours[0.9][0][:,1],linestyle='-.',c='green',linewidth=3,label='CheckMATE (k = 1.1)')
 
 axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
 axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
@@ -87,9 +86,9 @@ axes.set_yscale('log')
 # axes[1].set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
 
 cb = fig.colorbar(ax,label=r'$r=\sigma/\sigma_UL$')
-cb.set_label(r'$r$')
+cb.set_label(r'$r_{obs}$')
 plt.legend(loc='lower right',framealpha=0.9)
-plt.savefig("atlas_susy_2016_06_ExcComp.png")
+plt.savefig("checkmateExclusion.png")
 
 
 
@@ -110,17 +109,17 @@ ULdiff = (ULmapRecast-ULATLAS)/ULATLAS
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10,6))
 ax = axes.scatter(ULmap['MCHARGINO1_GEV'],ULmap['TAUCHARGINO1_NS'],
     c=ULdiff,cmap=cm,vmin=-0.5,vmax=0.5,s=120)
-axes.plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='black',linewidth=3,label='ATLAS',alpha=0.5)
+axes.plot(excATLAS['mC1_GeV'], 6.582e-16/excATLAS['width_GeV'],linestyle='-',c='black',linewidth=3,label='ATLAS',alpha=1.0)
 for i,pt in enumerate(ULdiff):
-    axes.annotate('%1.1f'%pt,(ULmap['MCHARGINO1_GEV'][i],1.05*ULmap['TAUCHARGINO1_NS'][i]),
+    axes.annotate('%1.2f'%pt,(ULmap['MCHARGINO1_GEV'][i],1.1*ULmap['TAUCHARGINO1_NS'][i]),
                     fontsize=15)
 
 
 axes.set_xlabel(r'$m_{\tilde{chi}_1^{\pm}}$ (GeV)')
 axes.set_ylabel(r'$\tau_{\tilde{\chi}_1^\pm}$ (ns)')
-axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm \tilde{\chi}_1^0$')
+axes.set_title(r'$\tilde{\chi}_1^\pm \tilde{\chi}_1^\mp + \tilde{\chi}_1^\pm \tilde{\chi}_1^0$ (CheckMATE)')
 axes.set_yscale('log')
 axes.set_xlim(120,650)
 cb = fig.colorbar(ax,label=r'$r=\sigma/\sigma_UL$')
-cb.set_label(r'$(\sigma_UL^{CM}-\sigma_UL^{ATLAS})/\sigma_UL^{ATLAS}$')
-plt.savefig("atlas_susy_2016_06_ULcomp.png")
+cb.set_label(r'$(\sigma_{UL}^{CM}-\sigma_{UL}^{ATLAS})/\sigma_{UL}^{ATLAS}$')
+plt.savefig("CMvsATLAS.png")
